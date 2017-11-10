@@ -39,6 +39,11 @@ class User
     private $enabled;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Group")
+     */
+    private $group;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
@@ -179,5 +184,29 @@ class User
     public function setCreatedAtValue()
     {
         $this->createdAt = new \DateTime();
+    }
+
+    /**
+     * Set group
+     *
+     * @param \AppBundle\Entity\Group $group
+     *
+     * @return User
+     */
+    public function setGroup(\AppBundle\Entity\Group $group = null)
+    {
+        $this->group = $group;
+
+        return $this;
+    }
+
+    /**
+     * Get group
+     *
+     * @return \AppBundle\Entity\Group
+     */
+    public function getGroup()
+    {
+        return $this->group;
     }
 }

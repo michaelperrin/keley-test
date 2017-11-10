@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Group;
 use AppBundle\Entity\User;
 use Doctrine\Common\Persistence\ObjectManager;
 use FOS\RestBundle\Controller\Annotations\RequestParam;
@@ -38,6 +39,7 @@ class UsersController extends FOSRestController
      * @RequestParam(name="firstName", nullable=false, description="First name")
      * @RequestParam(name="lastName", nullable=false, description="Last name")
      * @RequestParam(name="enabled", nullable=false, description="Whether user is enabled or not")
+     * @RequestParam(name="group", nullable=false, description="User's group")
      */
     public function postUsersAction(ParamFetcher $paramFetcher)
     {
@@ -61,7 +63,7 @@ class UsersController extends FOSRestController
      */
     public function getUserAction(int $id)
     {
-        $user = $this->getUserFromId($id);
+        $user = $this->getUserById($id);
 
         return $user;
     }
@@ -77,10 +79,11 @@ class UsersController extends FOSRestController
      * @RequestParam(name="firstName", nullable=false, description="First name")
      * @RequestParam(name="lastName", nullable=false, description="Last name")
      * @RequestParam(name="enabled", nullable=false, description="Whether user is enabled or not")
+     * @RequestParam(name="group", nullable=false, description="User's group")
      */
     public function putUserAction(ParamFetcher $paramFetcher, int $id)
     {
-        $user = $this->getUserFromId($id);
+        $user = $this->getUserById($id);
         $om = $this->getDoctrine()->getManager();
 
         $this->updateUserFromParameters($user, $paramFetcher);
@@ -93,17 +96,20 @@ class UsersController extends FOSRestController
 
     private function updateUserFromParameters(User $user, ParamFetcher $paramFetcher) : User
     {
+        $group = $this->getGroupByName($paramFetcher->get('group'));
+
         $user
             ->setEmail($paramFetcher->get('email'))
             ->setFirstName($paramFetcher->get('firstName'))
             ->setLastName($paramFetcher->get('lastName'))
             ->setEnabled($paramFetcher->get('enabled'))
+            ->setGroup($group)
         ;
 
         return $user;
     }
 
-    private function getUserFromId(int $id) : User
+    private function getUserById(int $id) : User
     {
         $om = $this->getDoctrine()->getManager();
         $user = $om->getRepository(User::class)->find($id);
@@ -113,5 +119,17 @@ class UsersController extends FOSRestController
         }
 
         return $user;
+    }
+
+    private function getGroupByName(string $name) : Group
+    {
+        $om = $this->getDoctrine()->getManager();
+        $group = $om->getRepository(Group::class)->findOneBy(['name' => $name]);
+
+        if (!$group) {
+            throw $this->createNotFoundException('Group not found.');
+        }
+
+        return $group;
     }
 }
