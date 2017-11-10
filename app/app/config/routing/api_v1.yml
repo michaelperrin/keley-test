@@ -1,3 +1,7 @@
 users:
     type:     rest
     resource: AppBundle\Controller\UsersController
+
+groups:
+    type:     rest
+    resource: AppBundle\Controller\GroupsController
