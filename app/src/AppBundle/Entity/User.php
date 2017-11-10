@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\Table(name="user")
+ * @ORM\HasLifecycleCallbacks
  */
 class User
 {
@@ -170,5 +171,13 @@ class User
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
     }
 }
