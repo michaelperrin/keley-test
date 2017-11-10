@@ -57,4 +57,24 @@ class UsersController extends FOSRestController
 
         return $user;
     }
+
+    /**
+     * @ApiDoc(
+     *  resource=true,
+     *  section="User",
+     *  description="Get user",
+     * )
+     */
+    public function getUserAction(int $id)
+    {
+        $om = $this->getDoctrine()->getManager();
+
+        $user = $om->getRepository(User::class)->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException('User not found.');
+        }
+
+        return $user;
+    }
 }
