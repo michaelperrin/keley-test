@@ -44,13 +44,7 @@ class UsersController extends FOSRestController
         $om = $this->getDoctrine()->getManager();
 
         $user = new User();
-
-        $user
-            ->setEmail($paramFetcher->get('email'))
-            ->setFirstName($paramFetcher->get('firstName'))
-            ->setLastName($paramFetcher->get('lastName'))
-            ->setEnabled($paramFetcher->get('enabled'))
-        ;
+        $this->updateUserFromParameters($user, $paramFetcher);
 
         $om->persist($user);
         $om->flush();
@@ -67,8 +61,51 @@ class UsersController extends FOSRestController
      */
     public function getUserAction(int $id)
     {
+        $user = $this->getUserFromId($id);
+
+        return $user;
+    }
+
+    /**
+     * @ApiDoc(
+     *  resource=true,
+     *  section="User",
+     *  description="Update user",
+     * )
+     *
+     * @RequestParam(name="email", nullable=false, description="E-mail address")
+     * @RequestParam(name="firstName", nullable=false, description="First name")
+     * @RequestParam(name="lastName", nullable=false, description="Last name")
+     * @RequestParam(name="enabled", nullable=false, description="Whether user is enabled or not")
+     */
+    public function putUserAction(ParamFetcher $paramFetcher, int $id)
+    {
+        $user = $this->getUserFromId($id);
         $om = $this->getDoctrine()->getManager();
 
+        $this->updateUserFromParameters($user, $paramFetcher);
+
+        $om->persist($user);
+        $om->flush();
+
+        return $user;
+    }
+
+    private function updateUserFromParameters(User $user, ParamFetcher $paramFetcher) : User
+    {
+        $user
+            ->setEmail($paramFetcher->get('email'))
+            ->setFirstName($paramFetcher->get('firstName'))
+            ->setLastName($paramFetcher->get('lastName'))
+            ->setEnabled($paramFetcher->get('enabled'))
+        ;
+
+        return $user;
+    }
+
+    private function getUserFromId(int $id) : User
+    {
+        $om = $this->getDoctrine()->getManager();
         $user = $om->getRepository(User::class)->find($id);
 
         if (!$user) {
