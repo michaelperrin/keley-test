@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity
@@ -19,6 +20,8 @@ class User
     private $id;
 
     /**
+     *
+     * @Assert\Email()
      * @ORM\Column(type="string", length=100)
      */
     private $email;

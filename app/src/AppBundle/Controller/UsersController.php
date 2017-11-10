@@ -4,11 +4,12 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Group;
 use AppBundle\Entity\User;
-use Doctrine\Common\Persistence\ObjectManager;
+use AppBundle\Form\Type\UserType;
 use FOS\RestBundle\Controller\Annotations\RequestParam;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Request\ParamFetcher;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Request;
 
 class UsersController extends FOSRestController
 {
@@ -33,25 +34,26 @@ class UsersController extends FOSRestController
      *  resource=true,
      *  section="User",
      *  description="Create user",
+     *  input="AppBundle\Form\Type\UserType"
      * )
-     *
-     * @RequestParam(name="email", nullable=false, description="E-mail address")
-     * @RequestParam(name="firstName", nullable=false, description="First name")
-     * @RequestParam(name="lastName", nullable=false, description="Last name")
-     * @RequestParam(name="enabled", nullable=false, description="Whether user is enabled or not")
-     * @RequestParam(name="group", nullable=false, description="User's group")
      */
-    public function postUsersAction(ParamFetcher $paramFetcher)
+    public function postUsersAction(Request $request)
     {
-        $om = $this->getDoctrine()->getManager();
-
         $user = new User();
-        $this->updateUserFromParameters($user, $paramFetcher);
 
-        $om->persist($user);
-        $om->flush();
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
 
-        return $user;
+        if ($form->isSubmitted() && $form->isValid()) {
+            $om = $this->getDoctrine()->getManager();
+
+            $om->persist($user);
+            $om->flush();
+
+            return $user;
+        }
+
+        return $form;
     }
 
     /**
@@ -73,40 +75,26 @@ class UsersController extends FOSRestController
      *  resource=true,
      *  section="User",
      *  description="Update user",
+     *  input="AppBundle\Form\Type\UserType"
      * )
-     *
-     * @RequestParam(name="email", nullable=false, description="E-mail address")
-     * @RequestParam(name="firstName", nullable=false, description="First name")
-     * @RequestParam(name="lastName", nullable=false, description="Last name")
-     * @RequestParam(name="enabled", nullable=false, description="Whether user is enabled or not")
-     * @RequestParam(name="group", nullable=false, description="User's group")
      */
-    public function putUserAction(ParamFetcher $paramFetcher, int $id)
+    public function putUserAction(Request $request, User $user)
     {
-        $user = $this->getUserById($id);
-        $om = $this->getDoctrine()->getManager();
+        // $user = $this->getUserById($id);
 
-        $this->updateUserFromParameters($user, $paramFetcher);
+        $form = $this->createForm(UserType::class, $user, ['method' => 'PUT']);
+        $form->handleRequest($request);
 
-        $om->persist($user);
-        $om->flush();
+        if ($form->isValid()) {
+            $om = $this->getDoctrine()->getManager();
 
-        return $user;
-    }
+            $om->persist($user);
+            $om->flush();
 
-    private function updateUserFromParameters(User $user, ParamFetcher $paramFetcher) : User
-    {
-        $group = $this->getGroupByName($paramFetcher->get('group'));
+            return $user;
+        }
 
-        $user
-            ->setEmail($paramFetcher->get('email'))
-            ->setFirstName($paramFetcher->get('firstName'))
-            ->setLastName($paramFetcher->get('lastName'))
-            ->setEnabled($paramFetcher->get('enabled'))
-            ->setGroup($group)
-        ;
-
-        return $user;
+        return $form;
     }
 
     private function getUserById(int $id) : User
