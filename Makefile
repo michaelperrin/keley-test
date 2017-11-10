@@ -7,7 +7,7 @@ help:           ## Show this help
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
 install:        ## Setup the project
-install: build install_php_deps db_schema_update
+install: build start install_php_deps db_schema_update
 
 start:          ## Start Docker containers
 	docker-compose up -d

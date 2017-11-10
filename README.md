@@ -6,6 +6,14 @@
 
     make install
 
+### Run project
+
+    make start
+
+### Stop project
+
+    make stop
+
 ### Generate entities
 
     make generate_entities
